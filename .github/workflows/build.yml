@@ -1,0 +1,31 @@
+name: Build APK
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.7
+      - name: Build
+        run: |
+          unzip -q MCToolbox.zip -d proj
+          cd proj
+          sed -i 's/roundBg(color: Int)/roundBg(fill: Int)/; s/setColor(color)/setColor(fill)/' app/src/main/java/com/toolbox/mc/MainActivity.kt
+          gradle assembleDebug --no-daemon
+      - name: Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete apk -y --cleanup-tag || true
+          gh release create apk proj/app/build/outputs/apk/debug/app-debug.apk --title "MC Toolbox APK" --notes "Debug APK"
