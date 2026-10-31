@@ -22,6 +22,7 @@ jobs:
           unzip -q MCToolbox.zip -d proj
           cd proj
           sed -i 's/roundBg(color: Int)/roundBg(fill: Int)/; s/setColor(color)/setColor(fill)/' app/src/main/java/com/toolbox/mc/MainActivity.kt
+          sed -i '13{/^import android.view.ViewGroup$/d}' app/src/main/java/com/toolbox/mc/MainActivity.kt
           gradle assembleDebug --no-daemon
       - name: Release
         env:
